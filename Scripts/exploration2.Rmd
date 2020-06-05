@@ -1,0 +1,30 @@
+---
+title: "exploration2"
+output: html_document
+---
+
+
+An R markdown file for exploring the NWSL data!
+
+```{r}
+library(tidyverse)
+nwsl <- read.csv("../Data/nwsl_season_stats.csv")
+str(nwsl)
+```
+
+Generate some exploratory graphs...
+
+looking at goals by position
+```{r}
+nwsl %>%
+  ggplot(aes(x = goals, y = pos)) +
+  geom_violin()
+```
+how many players are there at each position anyway?
+
+```{r}
+nwsl %>%
+  group_by(pos) %>%
+  summarize(count = n())
+```
+maybe it would be better to make the people who are two positions actually be only one position? to clean the data?
