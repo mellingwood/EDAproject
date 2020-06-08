@@ -28,3 +28,84 @@ nwsl %>%
   summarize(count = n())
 ```
 maybe it would be better to make the people who are two positions actually be only one position? to clean the data?
+
+
+approaches based on aggression...
+do more aggressive players also score more points?
+scatterplot of points (sum of goals and assists) vs. cards (sum of red and yellow)
+
+```{r}
+nwsl %>%
+  mutate(points = goals + assists, cards = yellow_cards + red_cards) %>%
+  ggplot(aes(x = cards, y = points, color = pos)) +
+  geom_jitter() +
+  theme_bw() +
+  labs(title = "Aggression and Scoring", x = "Red and Yellow Cards", y = "Points")
+```
+
+filtering out the defenders (and the 12 "DF,FW") as well as all of the players who did not get either a point or an assist over the season
+
+
+```{r}
+nwsl %>%
+  filter(pos %in% c("MF", "FW,MF","FW","DF,MF","DF,FW"), ((goals>0)|(assists>0))) %>%
+  mutate(points = goals + assists, cards = yellow_cards + red_cards) %>%
+  ggplot(aes(x = cards, y = points, color = pos)) +
+  geom_jitter() +
+  stat_smooth(method = "lm")+
+  theme_bw() +
+  labs(title = "Aggression and Scoring", x = "Red and Yellow Cards", y = "Points")
+```
+but would I rather leave in the players who never scored?
+
+```{r}
+nwsl %>%
+  filter(pos %in% c("MF", "FW,MF","FW","DF,MF","DF,FW")) %>%
+  mutate(points = goals + assists, cards = yellow_cards + red_cards) %>%
+  ggplot(aes(x = cards, y = points, color = pos)) +
+  geom_jitter() + 
+  stat_smooth(method = "lm")+
+  theme_bw() +
+  labs(title = "Aggression and Scoring", x = "Red and Yellow Cards", y = "Points")
+```
+or is geom_point clearer??
+
+```{r}
+nwsl %>%
+  filter(pos %in% c("MF", "FW,MF","FW","DF,MF","DF,FW")) %>%
+  mutate(points = goals + assists, cards = yellow_cards + red_cards) %>%
+  ggplot(aes(x = cards, y = points, color = pos)) +
+  geom_point() +
+  stat_smooth(method = "lm")+
+  theme_bw() +
+  labs(title = "Aggression and Scoring", x = "Red and Yellow Cards", y = "Points")
+```
+
+do different teams have different approaches with regards to star players versus lots of low-scoring players?
+
+first off, what does the histogram of goals per player look like for one team, say BOS?
+
+```{r}
+nwsl %>%
+  filter(team_id == "BOS") %>%
+  ggplot(aes(x = goals)) +
+  geom_histogram()
+```
+maybe I should filter by the amount of time that they've played, because the number that scored zero is so high?
+
+```{r}
+nwsl %>%
+  filter(team_id == "BOS", minutes >= 100) %>%
+  ggplot(aes(x = goals)) +
+  geom_histogram()
+```
+
+
+```{r}
+nwsl %>%
+  ggplot(aes(x = goals, y = team_id)) +
+  geom_violin() +
+  geom_boxplot(alpha = 0.3) +
+  theme_bw()
+```
+
