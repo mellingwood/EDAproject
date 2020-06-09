@@ -1,0 +1,35 @@
+---
+title: "aggression_vs_scoring"
+output: html_document
+---
+approaches based on aggression...
+do more aggressive players also score more points?
+scatterplot of points (sum of goals and assists) vs. cards (sum of red and yellow)
+
+because defenders tend not to score frequently, the defenders are filtered out.
+
+(I can't decide between geom_point(), which looks cleaner, and geom_jitter(), which gives more of a sense of the number of observations...)
+
+geom_jitter() version
+```{r}
+nwsl %>%
+  filter(pos %in% c("MF", "FW,MF","FW","DF,MF","DF,FW")) %>%
+  mutate(points = goals + assists, cards = yellow_cards + red_cards) %>%
+  ggplot(aes(x = cards, y = points, color = pos)) +
+  geom_jitter() + 
+  stat_smooth(method = "lm")+
+  theme_bw() +
+  labs(title = "Aggression and Scoring", x = "Red and Yellow Cards", y = "Points")
+```
+geom_point() version
+```{r}
+nwsl %>%
+  filter(pos %in% c("MF", "FW,MF","FW","DF,MF","DF,FW")) %>%
+  mutate(points = goals + assists, cards = yellow_cards + red_cards) %>%
+  ggplot(aes(x = cards, y = points, color = pos)) +
+  geom_point() +
+  stat_smooth(method = "lm")+
+  theme_bw() +
+  labs(title = "Aggression and Scoring", x = "Red and Yellow Cards", y = "Points")
+```
+

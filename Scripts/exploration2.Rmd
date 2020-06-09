@@ -105,7 +105,133 @@ nwsl %>%
 nwsl %>%
   ggplot(aes(x = goals, y = team_id)) +
   geom_violin() +
-  geom_boxplot(alpha = 0.3) +
+  geom_boxplot(width = 0.2) +
   theme_bw()
 ```
+back to approaches based on aggression...
+can we break the players into groups based on style of play with regards to aggression and scoring?
+
+```{r}
+nwsl <- nwsl %>%
+  mutate(points = goals + assists, cards = red_cards + yellow_cards)
+
+soccer_clustering <- protoclust(dist(dplyr::select(nwsl, 
+                                                   points, cards)))
+plot(soccer_clustering)
+  
+```
+well that dendrogram is not helpful...
+
+```{r}
+minimax_player_clusters <- protocut(soccer_clustering, k = 3)
+
+nwsl %>%
+  mutate(player_style_clusters = as.factor(minimax_player_clusters$cl)) %>%
+  ggplot(aes(x = cards, y = points, color = player_style_clusters)) +
+  geom_point() +
+  theme_bw()
+```
+
+so it looks like clustering ends up being really about point-scoring and not really about getting red or yellow cards
+
+what if I have it do more clusters?
+
+```{r}
+minimax_player_clusters <- protocut(soccer_clustering, k = 4)
+
+nwsl %>%
+  mutate(player_style_clusters = as.factor(minimax_player_clusters$cl)) %>%
+  ggplot(aes(x = cards, y = points, color = player_style_clusters)) +
+  geom_point() +
+  theme_bw()
+```
+
+four looks pretty much the same...
+
+```{r}
+minimax_player_clusters <- protocut(soccer_clustering, k = 5)
+
+nwsl %>%
+  mutate(player_style_clusters = as.factor(minimax_player_clusters$cl)) %>%
+  ggplot(aes(x = cards, y = points, color = player_style_clusters)) +
+  geom_point() +
+  theme_bw()
+```
+I think I would stick with the 3 cluster example, just because there are three main positions in soccer (D, M, F), but it might be good to add shapes of the points based on positions...
+
+```{r}
+minimax_player_clusters <- protocut(soccer_clustering, k = 3)
+
+nwsl %>%
+  mutate(player_style_clusters = as.factor(minimax_player_clusters$cl)) %>%
+  ggplot(aes(x = cards, y = points, color = player_style_clusters,
+             shape = pos)) +
+  geom_jitter() +
+  theme_bw()
+```
+I think I will go back and make these all restricted to players who were above a certain percentile of playing time...
+
+```{r}
+nwsl %>%
+  ggplot(aes(x = minutes)) +
+  stat_ecdf() +
+  theme_bw()
+```
+the ecdf is not really showing anything jumping out at me... so I guess I'll just go with 100 minutes and see if that has an effect...
+
+
+```{r}
+main_players_nwsl <- nwsl %>%
+  filter(minutes >= 100)
+
+soccer_clustering <- protoclust(dist(dplyr::select(main_players_nwsl, 
+                                                   points, cards)))
+
+minimax_player_clusters <- protocut(soccer_clustering, k = 3)
+
+main_players_nwsl %>%
+  mutate(player_style_clusters = as.factor(minimax_player_clusters$cl)) %>%
+  ggplot(aes(x = cards, y = points, color = player_style_clusters,
+             shape = pos)) +
+  geom_jitter() +
+  theme_bw()
+
+```
+but there is still a lot going on in that bottom left corner, so maybe I should increase my threshold for the number of minutes they have to play...
+
+```{r}
+main_players_nwsl <- nwsl %>%
+  filter(minutes >= 150)
+
+soccer_clustering <- protoclust(dist(dplyr::select(main_players_nwsl, 
+                                                   points, cards)))
+
+minimax_player_clusters <- protocut(soccer_clustering, k = 3)
+
+main_players_nwsl %>%
+  mutate(player_style_clusters = as.factor(minimax_player_clusters$cl)) %>%
+  ggplot(aes(x = cards, y = points, color = player_style_clusters,
+             shape = pos)) +
+  geom_jitter() +
+  theme_bw()
+```
+that is a bit better, but what if I go up even more...
+
+```{r}
+main_players_nwsl <- nwsl %>%
+  filter(minutes >= 200)
+
+soccer_clustering <- protoclust(dist(dplyr::select(main_players_nwsl, 
+                                                   points, cards)))
+
+minimax_player_clusters <- protocut(soccer_clustering, k = 3)
+
+main_players_nwsl %>%
+  mutate(player_style_clusters = as.factor(minimax_player_clusters$cl)) %>%
+  ggplot(aes(x = cards, y = points, color = player_style_clusters,
+             shape = pos)) +
+  geom_jitter() +
+  theme_bw()
+```
+I think I'll go with that one...
 
