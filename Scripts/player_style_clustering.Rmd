@@ -28,4 +28,11 @@ main_players_nwsl %>%
        y = "Points", shape = "Position", color = "Player Style Cluster") +
   theme_bw()
 ```
+now, to see which players are the prototypes for each cluster...
 
+```{r}
+minimax_player_clusters$protos
+
+dplyr::select(main_players_nwsl[minimax_player_clusters$protos, ], name, points, cards)
+```
+So the prototypical player for cluster 1 is Casey Short (a defender), cluster 2 is Christine Sinclair (a FW,MF), and cluster 3 is Sam Kerr (also a FW,MF).
