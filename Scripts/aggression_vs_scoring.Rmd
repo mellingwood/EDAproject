@@ -12,14 +12,18 @@ because defenders tend not to score frequently, the defenders are filtered out.
 
 geom_jitter() version
 ```{r}
-nwsl %>%
+aggression_scoring_plot <- nwsl %>%
   filter(pos %in% c("MF", "FW,MF","FW","DF,MF","DF,FW")) %>%
   mutate(points = goals + assists, cards = yellow_cards + red_cards) %>%
   ggplot(aes(x = cards, y = points, color = pos)) +
   geom_jitter() + 
   stat_smooth(method = "lm")+
   theme_bw() +
-  labs(title = "Aggression and Scoring", x = "Red and Yellow Cards", y = "Points")
+  labs(title = "Greater Aggression Relates to Greater Scoring in Forwards", subtitle = "2017-2019 Regular Season Data, Excluding Defenders", x = "Red and Yellow Cards", y = "Points", color = "Position")
+
+aggression_scoring_plot
+
+ggsave("../Images/aggression_scoring_plot.jpg", width = 8, height = 6)
 ```
 geom_point() version
 ```{r}
